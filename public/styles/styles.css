@@ -1,0 +1,142 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  position: fixed;
+}
+
+.parent {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.button {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.btn-xs {
+  padding: 0px;
+  font-size: 0.5rem;
+  line-height: 0.5;
+  border-radius: 2px;
+}
+
+.btn-outline-secondary:hover {
+  background-color: rgb(206, 206, 206);
+  color: black;
+}
+
+.extra {
+  float: right;
+  margin: 0 0.1rem;
+  display: none;
+}
+
+li:hover .extra {
+  display: block;
+}
+
+.subject {
+  float: right;
+  margin: 0 0.1rem;
+  display: block;
+}
+
+li:hover .subject {
+  display: none;
+}
+
+textarea {
+  resize: none;
+  border: none;
+  overflow: auto;
+  outline: none;
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  width: 100%;
+  min-height: 100%;
+  -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+  -moz-box-sizing: border-box; /* Firefox, other Gecko */
+  box-sizing: border-box;
+  overflow: auto;
+  scrollbar-color: rgb(187, 187, 187) white;
+  scrollbar-width: thin;
+}
+
+li {
+  cursor: pointer;
+}
+
+.div1 {
+  padding: 0.2rem;
+  margin-top: auto;
+  align-self: flex-start;
+  justify-self: flex-start;
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.div2 {
+  padding: 0.2rem;
+  margin-top: auto;
+  align-self: flex-end;
+  justify-self: flex-end;
+  grid-area: 1 / 3 / 2 / 5;
+}
+.div3 {
+  padding: 0.2rem;
+  margin-top: auto;
+  grid-area: 1 / 5 / 2 / 7;
+  align-self: flex-end;
+  justify-self: flex-end;
+}
+.div4 {
+  border-top: 0.1rem solid;
+  grid-area: 2 / 1 / 11 / 2;
+  border-right: 0.05rem solid;
+  border-color: gray;
+  overflow: auto;
+  scrollbar-color: rgb(187, 187, 187) white;
+  scrollbar-width: thin;
+}
+.div5 {
+  border-top: 0.1rem solid;
+  grid-area: 2 / 2 / 11 / 3;
+  border-right: 0.05rem solid;
+  border-color: gray;
+  overflow: auto;
+  scrollbar-color: rgb(187, 187, 187) white;
+  scrollbar-width: thin;
+}
+.div6 {
+  grid-area: 10 / 3 / 11 / 7;
+  width: 90%;
+  height: 90%;
+  margin: auto;
+  align-self: flex-center;
+  justify-self: flex-center;
+  display: block;
+}
+.div7 {
+  grid-area: 3 / 3 / 10 / 7;
+  overflow: auto;
+  scrollbar-color: rgb(187, 187, 187) white;
+  scrollbar-width: thin;
+}
+.div8 {
+  border-top: 0.1rem solid;
+  border-color: gray;
+  grid-area: 2 / 3 / 3 / 7;
+}
