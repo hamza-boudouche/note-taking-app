@@ -91,3 +91,13 @@ export const deleteCategory = async (filter: FilterQuery<Category>) => {
   await CategoryModel.deleteMany(filter);
   await disconnect();
 };
+
+export const getNewId = async () => {
+  await connectDB();
+  const res: Note[] = await getNote({});
+  if (res.length > 0) {
+    return Math.max(...res.map((note) => note.id)) + 1;
+  } else {
+    return 1;
+  }
+};

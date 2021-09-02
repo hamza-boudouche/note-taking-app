@@ -18,8 +18,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./styles/styles.css" />
-    <!-- <script src="./scripts/index/index.js" defer></script> -->
-    <script src="test.js" defer></script>
+    <script src="./scripts/index/indexfr.js" defer></script>
+    <!-- <script src="test.js" defer></script> -->
     <title>Notes</title>
   </head>
   <body>
@@ -64,11 +64,19 @@
       </div>
       <div class="div3">
         <div class="input-group mb-3">
-          <button type="button" class="btn btn-outline-secondary btn-sm">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            onclick="showAllButton()"
+          >
             <span class="material-icons"> layers </span>
           </button>
           <div class="input-group-append">
-            <button type="button" class="btn btn-outline-secondary btn-sm">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              onclick="addNoteButton()"
+            >
               <span class="material-icons"> note_add </span>
             </button>
           </div>
@@ -89,34 +97,6 @@
             </div>
           </li>
           <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
         </ul>
       </div>
       <div class="div5">
@@ -134,24 +114,14 @@
             </div>
           </li>
           <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
-          <li class="list-group-item btn-outline-secondary">Cras</li>
-          <li class="list-group-item btn-outline-secondary">Dapibus</li>
-          <li class="list-group-item btn-outline-secondary">Morbi</li>
-          <li class="list-group-item btn-outline-secondary">Porta</li>
-          <li class="list-group-item btn-outline-secondary">Vestibulum</li>
         </ul>
       </div>
       <div class="div6">
-        <button type="button" class="btn btn-outline-secondary button">
+        <button
+          type="button"
+          class="btn btn-outline-secondary button"
+          onclick="addNote()"
+        >
           Save note
         </button>
       </div>
@@ -160,6 +130,7 @@
           class="form-control"
           aria-label="With textarea"
           placeholder="Note body"
+          id="note-body"
         ></textarea>
       </div>
       <div class="div8">
@@ -167,6 +138,7 @@
           class="form-control"
           aria-label="With textarea"
           placeholder="Note title"
+          id="note-title"
         ></textarea>
       </div>
     </div>

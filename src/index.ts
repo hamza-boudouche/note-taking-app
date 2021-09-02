@@ -4,6 +4,7 @@ import path from "path";
 import {
   deleteCategory,
   deleteNote,
+  getNewId,
   getNote,
   insertCategory,
   insertNote,
@@ -59,8 +60,9 @@ app.post("/notes/category", async (req, res) => {
 
 app.post("/notes/", async (req, res) => {
   const newNote: Note = req.body.notes;
+  newNote.id = await getNewId();
   await insertNote(newNote);
-  return res.json({ success: true });
+  return res.json({ success: true, note: newNote });
 });
 
 app.put("/notes/category", async (req, res) => {
