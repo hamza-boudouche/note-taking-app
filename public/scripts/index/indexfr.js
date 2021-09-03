@@ -44,10 +44,10 @@ var currentState = {
     notes: []
 };
 var categoryTemplate = function (category) {
-    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + category.title + "\" onclick=\"clickCategory(event)\">\n  <span class=\"name\">" + category.title + "</span>\n  <div class=\"subject\"><small>" + category.subject + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\">\n      <span class=\"material-icons\"> delete </span>\n    </button>\n    <button type=\"button\" class=\"btn btn-outline-info btn-xs extra\">\n      <span class=\"material-icons\"> edit </span>\n    </button>\n  </div>\n  </li>";
+    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + category.title + "\" onclick=\"clickCategory(event)\">\n  <span class=\"name\">" + category.title + "</span>\n  <div class=\"subject\"><small>" + category.subject + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + category.title + "\" onclick=\"deleteCategory(event)\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> delete </span>\n    </button>\n    <button type=\"button\" class=\"btn btn-outline-info btn-xs extra\" id=\"" + category.title + "\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> edit </span>\n    </button>\n  </div>\n  </li>";
 };
 var noteTemplate = function (note) {
-    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + note.id + "\" onclick=\"clickNote(event)\">\n  <span class=\"name\">" + note.title + "</span>\n  <div class=\"subject\"><small>" + note.category.title + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\">\n      <span class=\"material-icons\"> delete </span>\n    </button>\n  </div>\n  </li>";
+    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + note.id + "\" onclick=\"clickNote(event)\">\n  <span class=\"name\">" + note.title + "</span>\n  <div class=\"subject\"><small>" + note.category.title + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + note.id + "\" onclick=\"deleteNote(event)\">\n      <span class=\"material-icons\" id=\"" + note.id + "\"> delete </span>\n    </button>\n  </div>\n  </li>";
 };
 var renderCategories = function () {
     var categoriesUl = document.getElementById("categories");
@@ -83,26 +83,32 @@ var renderNotes = function () {
         }
     }
 };
-// forgot to get categories separately
 (function () { return __awaiter(_this, void 0, void 0, function () {
-    var res, data;
+    var resNotes, dataNotes, resCat, dataCat;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, fetch(url + "/notes")];
             case 1:
-                res = _a.sent();
-                return [4 /*yield*/, res.json()];
+                resNotes = _a.sent();
+                return [4 /*yield*/, resNotes.json()];
             case 2:
-                data = _a.sent();
-                if (!data.success) {
+                dataNotes = _a.sent();
+                if (!dataNotes.success) {
                     alert("Error fetching notes");
                     return [2 /*return*/];
                 }
-                currentState.notes = data.notes;
-                currentState.categories = currentState.notes.map(function (note) { return note.category; });
-                currentState.categories = currentState.categories.filter(function (cat, pos) {
-                    return currentState.categories.indexOf(cat) == pos;
-                });
+                currentState.notes = dataNotes.notes;
+                return [4 /*yield*/, fetch(url + "/categories")];
+            case 3:
+                resCat = _a.sent();
+                return [4 /*yield*/, resCat.json()];
+            case 4:
+                dataCat = _a.sent();
+                if (!dataCat.success) {
+                    alert("Error fetching categories");
+                    return [2 /*return*/];
+                }
+                currentState.categories = dataCat.categories;
                 renderCategories();
                 renderNotes();
                 return [2 /*return*/];
@@ -112,7 +118,6 @@ var renderNotes = function () {
 var clickCategory = function (e) {
     currentState.categoryTitle = e.target.id;
     currentState.categorySubject = currentState.categories.find(function (c) { return c.title === currentState.categoryTitle; }).subject;
-    renderCategories();
     renderNotes();
 };
 var clickNote = function (e) {
@@ -127,6 +132,55 @@ var clickNote = function (e) {
         document.getElementById("new-note-body").value = "";
     }
 };
+var deleteCategory = function (e) { return __awaiter(_this, void 0, void 0, function () {
+    var title, res, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                title = e.target.id;
+                console.log(title);
+                return [4 /*yield*/, fetch(url + "/category/" + title, { method: "DELETE" })];
+            case 1:
+                res = _a.sent();
+                return [4 /*yield*/, res.json()];
+            case 2:
+                data = _a.sent();
+                if (!data.success) {
+                    alert("something went wrong, the category was not deleted");
+                    return [2 /*return*/];
+                }
+                currentState.categories = currentState.categories.filter(function (c) { return c.title != title; });
+                currentState.categoryTitle = null;
+                currentState.categorySubject = null;
+                renderCategories();
+                return [2 /*return*/];
+        }
+    });
+}); };
+var deleteNote = function (e) { return __awaiter(_this, void 0, void 0, function () {
+    var id, res, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = e.target.id;
+                return [4 /*yield*/, fetch(url + "/notes/" + id, { method: "DELETE" })];
+            case 1:
+                res = _a.sent();
+                return [4 /*yield*/, res.json()];
+            case 2:
+                data = _a.sent();
+                if (!data.success) {
+                    alert("something went wrong, the note was not deleted");
+                    return [2 /*return*/];
+                }
+                currentState.notes = currentState.notes.filter(function (n) { return n.id != Number(id); });
+                currentState.noteId = null;
+                renderNotes();
+                addNoteButton();
+                return [2 /*return*/];
+        }
+    });
+}); };
 var addCategory = function () { return __awaiter(_this, void 0, void 0, function () {
     var categoryTitle, categorySubject, newCategory, res, data, categoriesUl;
     return __generator(this, function (_a) {
@@ -165,6 +219,7 @@ var addCategory = function () { return __awaiter(_this, void 0, void 0, function
                 }
                 currentState.categoryTitle = categoryTitle;
                 currentState.categorySubject = categorySubject;
+                currentState.categories.push(newCategory);
                 return [2 /*return*/];
         }
     });

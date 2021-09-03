@@ -34,11 +34,11 @@ const categoryTemplate = (category: Category) => {
   <span class="name">${category.title}</span>
   <div class="subject"><small>${category.subject}</small></div>
   <div class="extra">
-    <button type="button" class="btn btn-outline-danger btn-xs extra">
-      <span class="material-icons"> delete </span>
+    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${category.title}" onclick="deleteCategory(event)">
+      <span class="material-icons" id="${category.title}"> delete </span>
     </button>
-    <button type="button" class="btn btn-outline-info btn-xs extra">
-      <span class="material-icons"> edit </span>
+    <button type="button" class="btn btn-outline-info btn-xs extra" id="${category.title}">
+      <span class="material-icons" id="${category.title}"> edit </span>
     </button>
   </div>
   </li>`;
@@ -49,8 +49,8 @@ const noteTemplate = (note: Note) => {
   <span class="name">${note.title}</span>
   <div class="subject"><small>${note.category.title}</small></div>
   <div class="extra">
-    <button type="button" class="btn btn-outline-danger btn-xs extra">
-      <span class="material-icons"> delete </span>
+    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${note.id}" onclick="deleteNote(event)">
+      <span class="material-icons" id="${note.id}"> delete </span>
     </button>
   </div>
   </li>`;
@@ -89,19 +89,22 @@ const renderNotes = () => {
     }
   }
 };
-// forgot to get categories separately
+
 (async () => {
-  const res = await fetch(`${url}/notes`);
-  const data = await res.json();
-  if (!data.success) {
+  const resNotes = await fetch(`${url}/notes`);
+  const dataNotes = await resNotes.json();
+  if (!dataNotes.success) {
     alert("Error fetching notes");
     return;
   }
-  currentState.notes = data.notes;
-  currentState.categories = currentState.notes.map((note) => note.category);
-  currentState.categories = currentState.categories.filter((cat, pos) => {
-    return currentState.categories.indexOf(cat) == pos;
-  });
+  currentState.notes = dataNotes.notes;
+  const resCat = await fetch(`${url}/categories`);
+  const dataCat = await resCat.json();
+  if (!dataCat.success) {
+    alert("Error fetching categories");
+    return;
+  }
+  currentState.categories = dataCat.categories;
   renderCategories();
   renderNotes();
 })();
@@ -111,7 +114,6 @@ const clickCategory = (e: Event) => {
   currentState.categorySubject = currentState.categories.find(
     (c) => c.title === currentState.categoryTitle
   )!.subject!;
-  renderCategories();
   renderNotes();
 };
 
@@ -128,6 +130,37 @@ const clickNote = (e: Event) => {
   } else {
     (document.getElementById("new-note-body") as HTMLInputElement).value = "";
   }
+};
+
+const deleteCategory = async (e: Event) => {
+  const title = (e.target as HTMLElement).id;
+  console.log(title);
+  const res = await fetch(`${url}/category/${title}`, { method: "DELETE" });
+  const data = await res.json();
+  if (!data.success) {
+    alert("something went wrong, the category was not deleted");
+    return;
+  }
+  currentState.categories = currentState.categories.filter(
+    (c) => c.title != title
+  );
+  currentState.categoryTitle = null;
+  currentState.categorySubject = null;
+  renderCategories();
+};
+
+const deleteNote = async (e: Event) => {
+  const id = (e.target! as HTMLElement).id;
+  const res = await fetch(`${url}/notes/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  if (!data.success) {
+    alert("something went wrong, the note was not deleted");
+    return;
+  }
+  currentState.notes = currentState.notes.filter((n) => n.id != Number(id));
+  currentState.noteId = null;
+  renderNotes();
+  addNoteButton();
 };
 
 const addCategory = async () => {
@@ -163,6 +196,7 @@ const addCategory = async () => {
   }
   currentState.categoryTitle = categoryTitle;
   currentState.categorySubject = categorySubject;
+  currentState.categories.push(newCategory);
 };
 
 const addNote = async () => {

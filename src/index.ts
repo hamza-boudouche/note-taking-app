@@ -5,6 +5,7 @@ import path from "path";
 import {
   deleteCategory,
   deleteNote,
+  getCategory,
   getNewId,
   getNote,
   insertCategory,
@@ -30,6 +31,11 @@ app.use(
 app.get("/notes", async (req, res) => {
   const notes = await getNote({});
   return res.json({ success: true, notes });
+});
+
+app.get("/categories", async (req, res) => {
+  const categories = await getCategory({});
+  return res.json({ success: true, categories });
 });
 
 app.get("/notes/search/:query", async (req, res) => {
