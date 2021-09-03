@@ -70,7 +70,7 @@ var renderNotes = function () {
     var notesUl = document.getElementById("notes");
     notesUl.innerHTML = "";
     if (currentState.categoryTitle) {
-        var notesToRender = currentState.notes.filter(function (note) { return note.title === currentState.categoryTitle; });
+        var notesToRender = currentState.notes.filter(function (note) { return note.category.title === currentState.categoryTitle; });
         for (var _i = 0, notesToRender_1 = notesToRender; _i < notesToRender_1.length; _i++) {
             var note = notesToRender_1[_i];
             notesUl.innerHTML += noteTemplate(note);
@@ -83,6 +83,7 @@ var renderNotes = function () {
         }
     }
 };
+// forgot to get categories separately
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var res, data;
     return __generator(this, function (_a) {
@@ -116,7 +117,7 @@ var clickCategory = function (e) {
 };
 var clickNote = function (e) {
     currentState.noteId = Number(e.target.id);
-    var note = currentState.notes.find(function (note) { return note.id === currentState.noteId; });
+    var note = currentState.notes.find(function (note) { return note.id == currentState.noteId; });
     document.getElementById("new-note-title").value =
         note.title;
     if (note.body) {
@@ -143,10 +144,12 @@ var addCategory = function () { return __awaiter(_this, void 0, void 0, function
                 };
                 return [4 /*yield*/, fetch(url + "/notes/category", {
                         method: "POST",
+                        mode: "cors",
                         headers: {
-                            "Content-type": "application/json; charset=UTF-8"
+                            Accept: "application/json",
+                            "Content-type": "application/json"
                         },
-                        body: JSON.stringify(newCategory)
+                        body: JSON.stringify({ category: newCategory })
                     })];
             case 1:
                 res = _a.sent();
@@ -194,7 +197,7 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                         headers: {
                             "Content-type": "application/json; charset=UTF-8"
                         },
-                        body: JSON.stringify(newNote)
+                        body: JSON.stringify({ note: newNote })
                     })];
             case 1:
                 res = _a.sent();

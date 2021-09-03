@@ -78,7 +78,7 @@ const renderNotes = () => {
   notesUl.innerHTML = "";
   if (currentState.categoryTitle) {
     const notesToRender = currentState.notes.filter(
-      (note) => note.title === currentState.categoryTitle
+      (note) => note.category.title === currentState.categoryTitle
     );
     for (const note of notesToRender) {
       notesUl.innerHTML += noteTemplate(note);
@@ -89,7 +89,7 @@ const renderNotes = () => {
     }
   }
 };
-
+// forgot to get categories separately
 (async () => {
   const res = await fetch(`${url}/notes`);
   const data = await res.json();
@@ -118,7 +118,7 @@ const clickCategory = (e: Event) => {
 const clickNote = (e: Event) => {
   currentState.noteId = Number((e.target! as HTMLElement).id);
   const note = currentState.notes.find(
-    (note) => note.id === currentState.noteId
+    (note) => note.id == currentState.noteId
   )!;
   (document.getElementById("new-note-title") as HTMLInputElement).value =
     note.title;
@@ -147,10 +147,12 @@ const addCategory = async () => {
   };
   const res = await fetch(`${url}/notes/category`, {
     method: "POST",
+    mode: "cors",
     headers: {
-      "Content-type": "application/json; charset=UTF-8",
+      Accept: "application/json",
+      "Content-type": "application/json",
     },
-    body: JSON.stringify(newCategory),
+    body: JSON.stringify({ category: newCategory }),
   });
   const data = await res.json();
   if (!data.success) {
@@ -191,7 +193,7 @@ const addNote = async () => {
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
-        body: JSON.stringify(newNote),
+        body: JSON.stringify({ note: newNote }),
       });
       const data = await res.json();
       if (!data.success) {

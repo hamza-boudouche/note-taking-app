@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import morgan from "morgan";
 import path from "path";
 import {
   deleteCategory,
@@ -16,6 +17,7 @@ import { Category, Note } from "./types";
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(morgan("combined"));
 app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -27,7 +29,7 @@ app.use(
 
 app.get("/notes", async (req, res) => {
   const notes = await getNote({});
-  return res.json({ sucess: true, notes });
+  return res.json({ success: true, notes });
 });
 
 app.get("/notes/search/:query", async (req, res) => {
@@ -54,36 +56,43 @@ app.get("/notes/category/:category", async (req, res) => {
 
 app.post("/notes/category", async (req, res) => {
   const newCategory: Category = req.body.category;
+  console.log(newCategory);
   await insertCategory(newCategory);
   return res.json({ success: true });
 });
 
 app.post("/notes/", async (req, res) => {
-  const newNote: Note = req.body.notes;
+  // check if category is already present, else return success: false and error message
+  const newNote: Note = req.body.note;
+  console.log(req.body);
   newNote.id = await getNewId();
   await insertNote(newNote);
   return res.json({ success: true, note: newNote });
 });
 
 app.put("/notes/category", async (req, res) => {
+  // check if category is present, else return success: false and error message
   const category: Category = req.body.category;
   await updateCategory({ title: category.title }, category);
   return res.json({ success: true });
 });
 
 app.put("/notes/", async (req, res) => {
+  // check if category is present, else return success: false and error message
   const note: Note = req.body.note;
   await updateNote({ id: note.id }, note);
   return res.json({ success: true });
 });
 
 app.delete("/category/:title", async (req, res) => {
+  //check if it exists and has no associated notes, else return success: false and error message
   const title = req.params.title;
   await deleteCategory({ title });
   return res.json({ success: true });
 });
 
 app.delete("/notes/:id", async (req, res) => {
+  //check if exists, else return success: false and error message
   const id = Number(req.params.id);
   await deleteNote({ id });
   return res.json({ success: true });
