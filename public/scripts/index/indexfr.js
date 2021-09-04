@@ -44,10 +44,10 @@ var currentState = {
     notes: []
 };
 var categoryTemplate = function (category) {
-    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + category.title + "\" onclick=\"clickCategory(event)\">\n  <span class=\"name\">" + category.title + "</span>\n  <div class=\"subject\"><small>" + category.subject + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + category.title + "\" onclick=\"deleteCategory(event)\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> delete </span>\n    </button>\n    <button type=\"button\" class=\"btn btn-outline-info btn-xs extra\" id=\"" + category.title + "\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> edit </span>\n    </button>\n  </div>\n  </li>";
+    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + category.title + "\" data-clickCategory=\"something\">\n  <span class=\"name\" id=\"" + category.title + "\">" + category.title + "</span>\n  <div class=\"subject\"><small>" + category.subject + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + category.title + "\" data-deleteCategory=\"something\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> delete </span>\n    </button>\n    <button type=\"button\" class=\"btn btn-outline-info btn-xs extra\" id=\"" + category.title + "\">\n      <span class=\"material-icons\" id=\"" + category.title + "\"> edit </span>\n    </button>\n  </div>\n  </li>";
 };
 var noteTemplate = function (note) {
-    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + note.id + "\" onclick=\"clickNote(event)\">\n  <span class=\"name\">" + note.title + "</span>\n  <div class=\"subject\"><small>" + note.category.title + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + note.id + "\" onclick=\"deleteNote(event)\">\n      <span class=\"material-icons\" id=\"" + note.id + "\"> delete </span>\n    </button>\n  </div>\n  </li>";
+    return "<li class=\"list-group-item btn-outline-secondary\" id=\"" + note.id + "\" data-clickNote=\"something\">\n  <span class=\"name\" id=\"" + note.id + "\">" + note.title + "</span>\n  <div class=\"subject\"><small>" + note.category.title + "</small></div>\n  <div class=\"extra\">\n    <button type=\"button\" class=\"btn btn-outline-danger btn-xs extra\" id=\"" + note.id + "\" data-deleteNote=\"something\">\n      <span class=\"material-icons\" id=\"" + note.id + "\"> delete </span>\n    </button>\n  </div>\n  </li>";
 };
 var renderCategories = function () {
     var categoriesUl = document.getElementById("categories");
@@ -64,6 +64,14 @@ var renderCategories = function () {
             var category = _b[_a];
             categoriesUl.innerHTML += categoryTemplate(category);
         }
+    }
+    for (var _c = 0, _d = document.querySelectorAll("[data-clickCategory]"); _c < _d.length; _c++) {
+        var element = _d[_c];
+        element.addEventListener("click", clickCategory);
+    }
+    for (var _e = 0, _f = document.querySelectorAll("[data-deleteCategory]"); _e < _f.length; _e++) {
+        var element = _f[_e];
+        element.addEventListener("click", deleteCategory);
     }
 };
 var renderNotes = function () {
@@ -82,42 +90,24 @@ var renderNotes = function () {
             notesUl.innerHTML += noteTemplate(note);
         }
     }
+    for (var _c = 0, _d = document.querySelectorAll("[data-clickNote]"); _c < _d.length; _c++) {
+        var element = _d[_c];
+        element.addEventListener("click", clickNote);
+    }
+    for (var _e = 0, _f = document.querySelectorAll("[data-deleteNote]"); _e < _f.length; _e++) {
+        var element = _f[_e];
+        element.addEventListener("click", deleteNote);
+    }
 };
-(function () { return __awaiter(_this, void 0, void 0, function () {
-    var resNotes, dataNotes, resCat, dataCat;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, fetch(url + "/notes")];
-            case 1:
-                resNotes = _a.sent();
-                return [4 /*yield*/, resNotes.json()];
-            case 2:
-                dataNotes = _a.sent();
-                if (!dataNotes.success) {
-                    alert("Error fetching notes");
-                    return [2 /*return*/];
-                }
-                currentState.notes = dataNotes.notes;
-                return [4 /*yield*/, fetch(url + "/categories")];
-            case 3:
-                resCat = _a.sent();
-                return [4 /*yield*/, resCat.json()];
-            case 4:
-                dataCat = _a.sent();
-                if (!dataCat.success) {
-                    alert("Error fetching categories");
-                    return [2 /*return*/];
-                }
-                currentState.categories = dataCat.categories;
-                renderCategories();
-                renderNotes();
-                return [2 /*return*/];
-        }
-    });
-}); })();
 var clickCategory = function (e) {
     currentState.categoryTitle = e.target.id;
-    currentState.categorySubject = currentState.categories.find(function (c) { return c.title === currentState.categoryTitle; }).subject;
+    try {
+        currentState.categorySubject = currentState.categories.find(function (c) { return c.title === currentState.categoryTitle; }).subject;
+    }
+    catch (error) {
+        console.log(currentState.categoryTitle);
+        console.log(currentState.categories);
+    }
     renderNotes();
 };
 var clickNote = function (e) {
@@ -146,7 +136,8 @@ var deleteCategory = function (e) { return __awaiter(_this, void 0, void 0, func
             case 2:
                 data = _a.sent();
                 if (!data.success) {
-                    alert("something went wrong, the category was not deleted");
+                    // @ts-ignore
+                    Swal.fire("something went wrong", "the category was not deleted!", "error");
                     return [2 /*return*/];
                 }
                 currentState.categories = currentState.categories.filter(function (c) { return c.title != title; });
@@ -170,7 +161,8 @@ var deleteNote = function (e) { return __awaiter(_this, void 0, void 0, function
             case 2:
                 data = _a.sent();
                 if (!data.success) {
-                    alert("something went wrong, the note was not deleted");
+                    // @ts-ignore
+                    Swal.fire("something went wrong", "the note was not deleted!", "error");
                     return [2 /*return*/];
                 }
                 currentState.notes = currentState.notes.filter(function (n) { return n.id != Number(id); });
@@ -189,7 +181,8 @@ var addCategory = function () { return __awaiter(_this, void 0, void 0, function
                 categoryTitle = document.getElementById("new-category-title").value;
                 categorySubject = document.getElementById("new-category-subject").value;
                 if (!categoryTitle) {
-                    alert("category title missing");
+                    // @ts-ignore
+                    Swal.fire("Error", "category title missing", "error");
                     return [2 /*return*/];
                 }
                 newCategory = {
@@ -211,7 +204,8 @@ var addCategory = function () { return __awaiter(_this, void 0, void 0, function
             case 2:
                 data = _a.sent();
                 if (!data.success) {
-                    alert("A problem occured");
+                    // @ts-ignore
+                    Swal.fire("Error", "A problem occured", "error");
                 }
                 else {
                     categoriesUl = document.getElementById("categories");
@@ -232,7 +226,8 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                 noteTitle = document.getElementById("new-note-title").value;
                 noteBody = document.getElementById("new-note-body").value;
                 if (!noteTitle) {
-                    alert("note title missing");
+                    // @ts-ignore
+                    Swal.fire("Error", "note title missing", "error");
                     return [2 /*return*/];
                 }
                 if (!(currentState.categoryTitle != null)) return [3 /*break*/, 5];
@@ -260,20 +255,24 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
             case 2:
                 data = _a.sent();
                 if (!data.success) {
-                    alert("A problem occured");
+                    // @ts-ignore
+                    Swal.fire("Error", "A problem occured", "error");
                 }
                 else {
                     notesUl = document.getElementById("notes");
                     newNote.id = data.note.id;
                     notesUl.innerHTML += noteTemplate(newNote);
+                    currentState.notes.push(newNote);
                 }
                 return [3 /*break*/, 4];
             case 3:
-                alert("category subject missing");
+                // @ts-ignore
+                Swal.fire("Error", "category subject missing", "error");
                 _a.label = 4;
             case 4: return [3 /*break*/, 6];
             case 5:
-                alert("category title missing");
+                // @ts-ignore
+                Swal.fire("Error", "category title missing", "error");
                 _a.label = 6;
             case 6: return [2 /*return*/];
         }
@@ -289,3 +288,82 @@ var showAllButton = function () {
     renderCategories();
     renderNotes();
 };
+var search = function (e) { return __awaiter(_this, void 0, void 0, function () {
+    var query, res, data, notes, categories, uniqueCategories;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                query = e.target.value;
+                return [4 /*yield*/, fetch(url + "/notes/search/" + query)];
+            case 1:
+                res = _a.sent();
+                return [4 /*yield*/, res.json()];
+            case 2:
+                data = _a.sent();
+                notes = currentState.notes;
+                categories = currentState.categories;
+                currentState.notes = data.notes;
+                currentState.categories = currentState.notes.map(function (n) { return n.category; });
+                uniqueCategories = currentState.categories.filter(function (category, index) {
+                    var _category = JSON.stringify(category);
+                    return (index ===
+                        currentState.categories.findIndex(function (obj) {
+                            return obj.title === category.title && obj.subject === category.subject;
+                        }));
+                });
+                console.log(currentState.notes);
+                console.log(currentState.categories);
+                currentState.categories = uniqueCategories;
+                renderCategories();
+                renderNotes();
+                currentState.notes = notes;
+                currentState.categories = categories;
+                return [2 /*return*/];
+        }
+    });
+}); };
+(function () { return __awaiter(_this, void 0, void 0, function () {
+    var resNotes, dataNotes, resCat, dataCat;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, fetch(url + "/notes")];
+            case 1:
+                resNotes = _a.sent();
+                return [4 /*yield*/, resNotes.json()];
+            case 2:
+                dataNotes = _a.sent();
+                if (!dataNotes.success) {
+                    // @ts-ignore
+                    Swal.fire("Error", "Error fetching notes", "error");
+                    return [2 /*return*/];
+                }
+                currentState.notes = dataNotes.notes;
+                return [4 /*yield*/, fetch(url + "/categories")];
+            case 3:
+                resCat = _a.sent();
+                return [4 /*yield*/, resCat.json()];
+            case 4:
+                dataCat = _a.sent();
+                if (!dataCat.success) {
+                    // @ts-ignore
+                    Swal.fire("Error", "Error fetching categories", "error");
+                    return [2 /*return*/];
+                }
+                currentState.categories = dataCat.categories;
+                renderCategories();
+                renderNotes();
+                document.querySelector("#add-note").addEventListener("click", addNote);
+                document
+                    .querySelector("#add-category")
+                    .addEventListener("click", addCategory);
+                document.querySelector("#search-bar").addEventListener("change", search);
+                document
+                    .querySelector("#show-all-button")
+                    .addEventListener("click", showAllButton);
+                document
+                    .querySelector("#add-note-button")
+                    .addEventListener("click", addNoteButton);
+                return [2 /*return*/];
+        }
+    });
+}); })();

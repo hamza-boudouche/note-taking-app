@@ -30,11 +30,11 @@ const currentState: State = {
 };
 
 const categoryTemplate = (category: Category) => {
-  return `<li class="list-group-item btn-outline-secondary" id="${category.title}" onclick="clickCategory(event)">
-  <span class="name">${category.title}</span>
+  return `<li class="list-group-item btn-outline-secondary" id="${category.title}" data-clickCategory="something">
+  <span class="name" id="${category.title}">${category.title}</span>
   <div class="subject"><small>${category.subject}</small></div>
   <div class="extra">
-    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${category.title}" onclick="deleteCategory(event)">
+    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${category.title}" data-deleteCategory="something">
       <span class="material-icons" id="${category.title}"> delete </span>
     </button>
     <button type="button" class="btn btn-outline-info btn-xs extra" id="${category.title}">
@@ -45,11 +45,11 @@ const categoryTemplate = (category: Category) => {
 };
 
 const noteTemplate = (note: Note) => {
-  return `<li class="list-group-item btn-outline-secondary" id="${note.id}" onclick="clickNote(event)">
-  <span class="name">${note.title}</span>
+  return `<li class="list-group-item btn-outline-secondary" id="${note.id}" data-clickNote="something">
+  <span class="name" id="${note.id}">${note.title}</span>
   <div class="subject"><small>${note.category.title}</small></div>
   <div class="extra">
-    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${note.id}" onclick="deleteNote(event)">
+    <button type="button" class="btn btn-outline-danger btn-xs extra" id="${note.id}" data-deleteNote="something">
       <span class="material-icons" id="${note.id}"> delete </span>
     </button>
   </div>
@@ -71,6 +71,18 @@ const renderCategories = () => {
       categoriesUl.innerHTML += categoryTemplate(category);
     }
   }
+
+  for (const element of document.querySelectorAll(
+    "[data-clickCategory]"
+  ) as any) {
+    element.addEventListener("click", clickCategory);
+  }
+
+  for (const element of document.querySelectorAll(
+    "[data-deleteCategory]"
+  ) as any) {
+    element.addEventListener("click", deleteCategory);
+  }
 };
 
 const renderNotes = () => {
@@ -88,32 +100,26 @@ const renderNotes = () => {
       notesUl.innerHTML += noteTemplate(note);
     }
   }
-};
 
-(async () => {
-  const resNotes = await fetch(`${url}/notes`);
-  const dataNotes = await resNotes.json();
-  if (!dataNotes.success) {
-    alert("Error fetching notes");
-    return;
+  for (const element of document.querySelectorAll("[data-clickNote]") as any) {
+    element.addEventListener("click", clickNote);
   }
-  currentState.notes = dataNotes.notes;
-  const resCat = await fetch(`${url}/categories`);
-  const dataCat = await resCat.json();
-  if (!dataCat.success) {
-    alert("Error fetching categories");
-    return;
+
+  for (const element of document.querySelectorAll("[data-deleteNote]") as any) {
+    element.addEventListener("click", deleteNote);
   }
-  currentState.categories = dataCat.categories;
-  renderCategories();
-  renderNotes();
-})();
+};
 
 const clickCategory = (e: Event) => {
   currentState.categoryTitle = (e.target! as HTMLElement).id;
-  currentState.categorySubject = currentState.categories.find(
-    (c) => c.title === currentState.categoryTitle
-  )!.subject!;
+  try {
+    currentState.categorySubject = currentState.categories.find(
+      (c) => c.title === currentState.categoryTitle
+    )!.subject!;
+  } catch (error) {
+    console.log(currentState.categoryTitle);
+    console.log(currentState.categories);
+  }
   renderNotes();
 };
 
@@ -138,7 +144,12 @@ const deleteCategory = async (e: Event) => {
   const res = await fetch(`${url}/category/${title}`, { method: "DELETE" });
   const data = await res.json();
   if (!data.success) {
-    alert("something went wrong, the category was not deleted");
+    // @ts-ignore
+    (Swal as any).fire(
+      "something went wrong",
+      "the category was not deleted!",
+      "error"
+    );
     return;
   }
   currentState.categories = currentState.categories.filter(
@@ -154,7 +165,12 @@ const deleteNote = async (e: Event) => {
   const res = await fetch(`${url}/notes/${id}`, { method: "DELETE" });
   const data = await res.json();
   if (!data.success) {
-    alert("something went wrong, the note was not deleted");
+    // @ts-ignore
+    (Swal as any).fire(
+      "something went wrong",
+      "the note was not deleted!",
+      "error"
+    );
     return;
   }
   currentState.notes = currentState.notes.filter((n) => n.id != Number(id));
@@ -171,7 +187,8 @@ const addCategory = async () => {
     document.getElementById("new-category-subject")! as HTMLInputElement
   ).value;
   if (!categoryTitle) {
-    alert("category title missing");
+    // @ts-ignore
+    (Swal as any).fire("Error", "category title missing", "error");
     return;
   }
   const newCategory = {
@@ -189,7 +206,8 @@ const addCategory = async () => {
   });
   const data = await res.json();
   if (!data.success) {
-    alert("A problem occured");
+    // @ts-ignore
+    (Swal as any).fire("Error", "A problem occured", "error");
   } else {
     const categoriesUl = document.getElementById("categories")!;
     categoriesUl.innerHTML += categoryTemplate(newCategory);
@@ -207,7 +225,8 @@ const addNote = async () => {
     document.getElementById("new-note-body") as HTMLInputElement
   ).value;
   if (!noteTitle) {
-    alert("note title missing");
+    // @ts-ignore
+    (Swal as any).fire("Error", "note title missing", "error");
     return;
   }
   if (currentState.categoryTitle != null) {
@@ -231,17 +250,21 @@ const addNote = async () => {
       });
       const data = await res.json();
       if (!data.success) {
-        alert("A problem occured");
+        // @ts-ignore
+        (Swal as any).fire("Error", "A problem occured", "error");
       } else {
         const notesUl = document.getElementById("notes")!;
         newNote.id = data.note.id;
         notesUl.innerHTML += noteTemplate(newNote);
+        currentState.notes.push(newNote);
       }
     } else {
-      alert("category subject missing");
+      // @ts-ignore
+      (Swal as any).fire("Error", "category subject missing", "error");
     }
   } else {
-    alert("category title missing");
+    // @ts-ignore
+    (Swal as any).fire("Error", "category title missing", "error");
   }
 };
 
@@ -256,3 +279,61 @@ const showAllButton = () => {
   renderCategories();
   renderNotes();
 };
+
+const search = async (e: Event) => {
+  const query = (e.target as HTMLInputElement).value;
+  const res = await fetch(`${url}/notes/search/${query}`);
+  const data = await res.json();
+  const notes = currentState.notes;
+  const categories = currentState.categories;
+  currentState.notes = data.notes;
+  currentState.categories = currentState.notes.map((n) => n.category);
+  const uniqueCategories = currentState.categories.filter((category, index) => {
+    const _category = JSON.stringify(category);
+    return (
+      index ===
+      currentState.categories.findIndex((obj) => {
+        return obj.title === category.title && obj.subject === category.subject;
+      })
+    );
+  });
+  console.log(currentState.notes);
+  console.log(currentState.categories);
+  currentState.categories = uniqueCategories;
+  renderCategories();
+  renderNotes();
+  currentState.notes = notes;
+  currentState.categories = categories;
+};
+
+(async () => {
+  const resNotes = await fetch(`${url}/notes`);
+  const dataNotes = await resNotes.json();
+  if (!dataNotes.success) {
+    // @ts-ignore
+    (Swal as any).fire("Error", "Error fetching notes", "error");
+    return;
+  }
+  currentState.notes = dataNotes.notes;
+  const resCat = await fetch(`${url}/categories`);
+  const dataCat = await resCat.json();
+  if (!dataCat.success) {
+    // @ts-ignore
+    (Swal as any).fire("Error", "Error fetching categories", "error");
+    return;
+  }
+  currentState.categories = dataCat.categories;
+  renderCategories();
+  renderNotes();
+  document.querySelector("#add-note")!.addEventListener("click", addNote);
+  document
+    .querySelector("#add-category")!
+    .addEventListener("click", addCategory);
+  document.querySelector("#search-bar")!.addEventListener("change", search);
+  document
+    .querySelector("#show-all-button")!
+    .addEventListener("click", showAllButton);
+  document
+    .querySelector("#add-note-button")!
+    .addEventListener("click", addNoteButton);
+})();

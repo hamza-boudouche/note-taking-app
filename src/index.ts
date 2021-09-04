@@ -38,6 +38,11 @@ app.get("/categories", async (req, res) => {
   return res.json({ success: true, categories });
 });
 
+app.get("/notes/search", async (req, res) => {
+  const notes = await getNote({});
+  return res.json({ success: true, notes });
+});
+
 app.get("/notes/search/:query", async (req, res) => {
   const searchQuery = req.params.query;
   const categorieTitles = await getNote({
@@ -48,9 +53,19 @@ app.get("/notes/search/:query", async (req, res) => {
   });
   const titles = await getNote({ title: { $regex: new RegExp(searchQuery) } });
   const bodies = await getNote({ body: { $regex: new RegExp(searchQuery) } });
+  let result = [...categorieTitles, ...categorieSubjects, ...titles, ...bodies];
+  result = result.filter((note, index) => {
+    const _note = JSON.stringify(note);
+    return (
+      index ===
+      result.findIndex((obj) => {
+        return JSON.stringify(obj) === _note;
+      })
+    );
+  });
   return res.json({
     success: true,
-    notes: [...categorieTitles, ...categorieSubjects, ...titles, ...bodies],
+    notes: result,
   });
 });
 
