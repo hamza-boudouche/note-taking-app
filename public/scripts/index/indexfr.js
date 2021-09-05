@@ -101,15 +101,55 @@ var renderNotes = function () {
 };
 var clickCategory = function (e) {
     currentState.categoryTitle = e.target.id;
-    try {
-        currentState.categorySubject = currentState.categories.find(function (c) { return c.title === currentState.categoryTitle; }).subject;
-    }
-    catch (error) {
-        console.log(currentState.categoryTitle);
-        console.log(currentState.categories);
-    }
+    currentState.categorySubject = currentState.categories.find(function (c) { return c.title === currentState.categoryTitle; }).subject;
     renderNotes();
 };
+var updateCategory = function (e) { return __awaiter(_this, void 0, void 0, function () {
+    var title, subject, newTitle, res, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                title = e.target.id;
+                subject = currentState.categories.find(function (c) { return c.title === title; })
+                    .subject;
+                return [4 /*yield*/, Swal.fire({
+                        title: "Input new Category name",
+                        input: "email",
+                        inputLabel: "Your email address",
+                        inputValue: title,
+                        inputPlaceholder: "Enter your email address"
+                    })];
+            case 1:
+                newTitle = (_a.sent()).value;
+                return [4 /*yield*/, fetch(url + "/notes/category", {
+                        method: "PUT",
+                        mode: "cors",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-type": "application/json"
+                        },
+                        body: JSON.stringify({ category: { title: newTitle, subject: subject } })
+                    })];
+            case 2:
+                res = _a.sent();
+                return [4 /*yield*/, res.json()];
+            case 3:
+                data = _a.sent();
+                if (!data.success) {
+                    // @ts-ignore
+                    Swal.fire("Error", "A problem occured", "error");
+                }
+                currentState.categories = data.categories;
+                currentState.notes = data.notes;
+                currentState.categoryTitle = null;
+                currentState.categorySubject = null;
+                currentState.noteId = null;
+                renderNotes();
+                renderCategories();
+                return [2 /*return*/];
+        }
+    });
+}); };
 var clickNote = function (e) {
     currentState.noteId = Number(e.target.id);
     var note = currentState.notes.find(function (note) { return note.id == currentState.noteId; });
@@ -143,6 +183,7 @@ var deleteCategory = function (e) { return __awaiter(_this, void 0, void 0, func
                 currentState.categories = currentState.categories.filter(function (c) { return c.title != title; });
                 currentState.categoryTitle = null;
                 currentState.categorySubject = null;
+                currentState.noteId = null;
                 renderCategories();
                 return [2 /*return*/];
         }
@@ -219,7 +260,7 @@ var addCategory = function () { return __awaiter(_this, void 0, void 0, function
     });
 }); };
 var addNote = function () { return __awaiter(_this, void 0, void 0, function () {
-    var noteTitle, noteBody, newNote, res, data, notesUl;
+    var noteTitle, noteBody, newNote, res, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -233,7 +274,7 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                 if (!(currentState.categoryTitle != null)) return [3 /*break*/, 5];
                 if (!(currentState.categorySubject != null)) return [3 /*break*/, 3];
                 newNote = {
-                    id: 1,
+                    id: currentState.noteId || 1,
                     category: {
                         subject: currentState.categorySubject,
                         title: currentState.categoryTitle
@@ -243,7 +284,7 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                     body: noteBody
                 };
                 return [4 /*yield*/, fetch(url + "/notes", {
-                        method: "POST",
+                        method: currentState.noteId ? "PUT" : "POST",
                         headers: {
                             "Content-type": "application/json; charset=UTF-8"
                         },
@@ -259,10 +300,8 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                     Swal.fire("Error", "A problem occured", "error");
                 }
                 else {
-                    notesUl = document.getElementById("notes");
-                    newNote.id = data.note.id;
-                    notesUl.innerHTML += noteTemplate(newNote);
-                    currentState.notes.push(newNote);
+                    currentState.notes = data.notes;
+                    renderNotes();
                 }
                 return [3 /*break*/, 4];
             case 3:
@@ -274,7 +313,9 @@ var addNote = function () { return __awaiter(_this, void 0, void 0, function () 
                 // @ts-ignore
                 Swal.fire("Error", "category title missing", "error");
                 _a.label = 6;
-            case 6: return [2 /*return*/];
+            case 6:
+                currentState.noteId = null;
+                return [2 /*return*/];
         }
     });
 }); };
@@ -285,6 +326,7 @@ var addNoteButton = function () {
 var showAllButton = function () {
     currentState.categoryTitle = null;
     currentState.categorySubject = null;
+    currentState.noteId = null;
     renderCategories();
     renderNotes();
 };

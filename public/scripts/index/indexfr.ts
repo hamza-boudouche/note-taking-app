@@ -112,15 +112,45 @@ const renderNotes = () => {
 
 const clickCategory = (e: Event) => {
   currentState.categoryTitle = (e.target! as HTMLElement).id;
-  try {
-    currentState.categorySubject = currentState.categories.find(
-      (c) => c.title === currentState.categoryTitle
-    )!.subject!;
-  } catch (error) {
-    console.log(currentState.categoryTitle);
-    console.log(currentState.categories);
-  }
+  currentState.categorySubject = currentState.categories.find(
+    (c) => c.title === currentState.categoryTitle
+  )!.subject!;
   renderNotes();
+};
+
+const updateCategory = async (e: Event) => {
+  const title = (e.target! as HTMLElement).id;
+  const subject = currentState.categories.find((c) => c.title === title)!
+    .subject!;
+  // @ts-ignore
+  const { value: newTitle } = await Swal.fire({
+    title: "Input new Category name",
+    input: "email",
+    inputLabel: "Your email address",
+    inputValue: title,
+    inputPlaceholder: "Enter your email address",
+  });
+  const res = await fetch(`${url}/notes/category`, {
+    method: "PUT",
+    mode: "cors",
+    headers: {
+      Accept: "application/json",
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify({ category: { title: newTitle, subject: subject } }),
+  });
+  const data = await res.json();
+  if (!data.success) {
+    // @ts-ignore
+    (Swal as any).fire("Error", "A problem occured", "error");
+  }
+  currentState.categories = data.categories;
+  currentState.notes = data.notes;
+  currentState.categoryTitle = null;
+  currentState.categorySubject = null;
+  currentState.noteId = null;
+  renderNotes();
+  renderCategories();
 };
 
 const clickNote = (e: Event) => {
@@ -157,6 +187,7 @@ const deleteCategory = async (e: Event) => {
   );
   currentState.categoryTitle = null;
   currentState.categorySubject = null;
+  currentState.noteId = null;
   renderCategories();
 };
 
@@ -232,7 +263,7 @@ const addNote = async () => {
   if (currentState.categoryTitle != null) {
     if (currentState.categorySubject != null) {
       const newNote: Note = {
-        id: 1,
+        id: currentState.noteId || 1,
         category: {
           subject: currentState.categorySubject,
           title: currentState.categoryTitle,
@@ -242,7 +273,7 @@ const addNote = async () => {
         body: noteBody,
       };
       const res = await fetch(`${url}/notes`, {
-        method: "POST",
+        method: currentState.noteId ? "PUT" : "POST",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
@@ -253,10 +284,8 @@ const addNote = async () => {
         // @ts-ignore
         (Swal as any).fire("Error", "A problem occured", "error");
       } else {
-        const notesUl = document.getElementById("notes")!;
-        newNote.id = data.note.id;
-        notesUl.innerHTML += noteTemplate(newNote);
-        currentState.notes.push(newNote);
+        currentState.notes = data.notes;
+        renderNotes();
       }
     } else {
       // @ts-ignore
@@ -266,6 +295,7 @@ const addNote = async () => {
     // @ts-ignore
     (Swal as any).fire("Error", "category title missing", "error");
   }
+  currentState.noteId = null;
 };
 
 const addNoteButton = () => {
@@ -276,6 +306,7 @@ const addNoteButton = () => {
 const showAllButton = () => {
   currentState.categoryTitle = null;
   currentState.categorySubject = null;
+  currentState.noteId = null;
   renderCategories();
   renderNotes();
 };

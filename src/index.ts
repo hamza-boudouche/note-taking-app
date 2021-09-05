@@ -95,7 +95,8 @@ app.put("/notes/category", async (req, res) => {
   // check if category is present, else return success: false and error message
   const category: Category = req.body.category;
   await updateCategory({ title: category.title }, category);
-  return res.json({ success: true });
+  // need to update the notes that had this same category
+  return res.json({ success: true, notes: null, categories: null });
 });
 
 app.put("/notes/", async (req, res) => {
