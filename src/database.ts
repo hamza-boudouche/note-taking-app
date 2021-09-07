@@ -96,8 +96,43 @@ export const getNewId = async () => {
   await connectDB();
   const res: Note[] = await getNote({});
   if (res.length > 0) {
+    await disconnect();
     return Math.max(...res.map((note) => note.id)) + 1;
   } else {
+    await disconnect();
     return 1;
   }
+};
+
+export const categoryExists = async (category: {
+  title: string;
+  subject?: string;
+}) => {
+  await connectDB();
+  const res: Category[] = await getCategory({
+    "category.title": category.title,
+  });
+  if (res.length > 0) {
+    await disconnect();
+    return true;
+  }
+  await disconnect();
+  return false;
+};
+
+export const noteExists = async (note: {
+  id: number;
+  category?: Category;
+  title?: string;
+  body?: string;
+  date?: Date;
+}) => {
+  await connectDB();
+  const res = await getNote(note);
+  if (res.length > 0) {
+    await disconnect();
+    return true;
+  }
+  await disconnect();
+  return false;
 };

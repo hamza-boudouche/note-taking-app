@@ -6,22 +6,20 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts",
-    "buildfr": "webpack ./public/scripts/index/indexfr.js ./public/scripts/index/bundle.js",
     "build": "tsc -p ."
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/cors": "^2.8.12",
-    "@types/morgan": "^1.9.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "mongoose": "^6.0.3",
-    "morgan": "^1.10.0",
-    "sweetalert2": "^11.1.4",
-    "webpack": "^5.52.0"
+    "sweetalert2": "^11.1.5"
   },
   "devDependencies": {
+    "morgan": "^1.10.0",
+    "@types/cors": "^2.8.12",
+    "@types/morgan": "^1.9.3",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
     "@types/mongoose": "^5.11.97",

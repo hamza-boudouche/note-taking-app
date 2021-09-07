@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import path from "path";
 import {
+  categoryExists,
   deleteCategory,
   deleteNote,
   getCategory,
@@ -10,6 +11,7 @@ import {
   getNote,
   insertCategory,
   insertNote,
+  noteExists,
   updateCategory,
   updateNote,
 } from "./database";
@@ -19,7 +21,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(morgan("combined"));
-app.use(express.static(path.join(__dirname, "../public")));
+app.use("/", express.static(path.join(__dirname, "../public")));
+app.use(
+  "/node_modules",
+  express.static(path.join(__dirname, "../node_modules"))
+);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(
@@ -83,41 +89,58 @@ app.post("/notes/category", async (req, res) => {
 });
 
 app.post("/notes/", async (req, res) => {
-  // check if category is already present, else return success: false and error message
   const newNote: Note = req.body.note;
-  console.log(req.body);
-  newNote.id = await getNewId();
-  await insertNote(newNote);
-  return res.json({ success: true, note: newNote });
+  if (await categoryExists(newNote.category)) {
+    newNote.id = await getNewId();
+    await insertNote(newNote);
+    const notes = await getNote({});
+    return res.json({ success: true, note: newNote, notes });
+  }
+  return res.json({ success: false, error: "category doesn't exist" });
 });
 
 app.put("/notes/category", async (req, res) => {
-  // check if category is present, else return success: false and error message
-  const category: Category = req.body.category;
-  await updateCategory({ title: category.title }, category);
-  // need to update the notes that had this same category
-  return res.json({ success: true, notes: null, categories: null });
+  const oldCategory: Category = req.body.oldCategory;
+  const newCategory: Category = req.body.newCategory;
+  if (await categoryExists(oldCategory)) {
+    await updateCategory({ title: oldCategory.title }, newCategory);
+    await updateNote(
+      { "category.title": oldCategory.title },
+      { category: newCategory }
+    );
+    const notes = await getNote({});
+    const categories = await getCategory({});
+    return res.json({ success: true, notes, categories });
+  }
+  return res.json({ success: false, error: "category doesn't exist" });
 });
 
 app.put("/notes/", async (req, res) => {
-  // check if category is present, else return success: false and error message
   const note: Note = req.body.note;
-  await updateNote({ id: note.id }, note);
-  return res.json({ success: true });
+  if (await categoryExists(note.category)) {
+    await updateNote({ id: note.id }, note);
+    const notes = await getNote({});
+    return res.json({ success: true, notes });
+  }
+  return res.json({ success: false, error: "category doesn't exist" });
 });
 
 app.delete("/category/:title", async (req, res) => {
-  //check if it exists and has no associated notes, else return success: false and error message
   const title = req.params.title;
-  await deleteCategory({ title });
-  return res.json({ success: true });
+  if (await categoryExists({ title })) {
+    await deleteCategory({ title });
+    return res.json({ success: true });
+  }
+  return res.json({ success: false, error: "category doesn't exist" });
 });
 
 app.delete("/notes/:id", async (req, res) => {
-  //check if exists, else return success: false and error message
   const id = Number(req.params.id);
-  await deleteNote({ id });
-  return res.json({ success: true });
+  if (await noteExists({ id })) {
+    await deleteNote({ id });
+    return res.json({ success: true });
+  }
+  return res.json({ success: false, error: "note doesn't exist" });
 });
 
 app.listen(port, () => {

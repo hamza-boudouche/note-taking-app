@@ -37,7 +37,7 @@ const categoryTemplate = (category: Category) => {
     <button type="button" class="btn btn-outline-danger btn-xs extra" id="${category.title}" data-deleteCategory="something">
       <span class="material-icons" id="${category.title}"> delete </span>
     </button>
-    <button type="button" class="btn btn-outline-info btn-xs extra" id="${category.title}">
+    <button type="button" class="btn btn-outline-info btn-xs extra" id="${category.title}" data-updateCategory="something">
       <span class="material-icons" id="${category.title}"> edit </span>
     </button>
   </div>
@@ -83,6 +83,12 @@ const renderCategories = () => {
   ) as any) {
     element.addEventListener("click", deleteCategory);
   }
+
+  for (const element of document.querySelectorAll(
+    "[data-updateCategory]"
+  ) as any) {
+    element.addEventListener("click", updateCategory);
+  }
 };
 
 const renderNotes = () => {
@@ -124,12 +130,13 @@ const updateCategory = async (e: Event) => {
     .subject!;
   // @ts-ignore
   const { value: newTitle } = await Swal.fire({
-    title: "Input new Category name",
-    input: "email",
-    inputLabel: "Your email address",
+    title: "Input new Category title",
+    input: "text",
+    inputLabel: "the new category title",
     inputValue: title,
-    inputPlaceholder: "Enter your email address",
+    inputPlaceholder: "Enter the new category title",
   });
+  alert(newTitle);
   const res = await fetch(`${url}/notes/category`, {
     method: "PUT",
     mode: "cors",
@@ -137,7 +144,10 @@ const updateCategory = async (e: Event) => {
       Accept: "application/json",
       "Content-type": "application/json",
     },
-    body: JSON.stringify({ category: { title: newTitle, subject: subject } }),
+    body: JSON.stringify({
+      oldCategory: { title, subject },
+      newCategory: { title: newTitle, subject },
+    }),
   });
   const data = await res.json();
   if (!data.success) {
@@ -220,6 +230,11 @@ const addCategory = async () => {
   if (!categoryTitle) {
     // @ts-ignore
     (Swal as any).fire("Error", "category title missing", "error");
+    return;
+  }
+  if (!categorySubject) {
+    // @ts-ignore
+    (Swal as any).fire("Error", "category subject missing", "error");
     return;
   }
   const newCategory = {
