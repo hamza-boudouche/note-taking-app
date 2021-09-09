@@ -27,7 +27,6 @@
     "dotenv": "^10.0.0",
     "nodemon": "^2.0.12",
     "ts-node": "^10.2.1",
-    "typescript": "^4.4.2",
-    "webpack-cli": "^4.8.0"
+    "typescript": "^4.4.2"
   }
 }
